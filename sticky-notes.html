@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stylish Sticky Notes</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hubot+Sans:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+  <!-- Import custom Google Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Caveat:wght@400;700&family=Dancing+Script&family=Indie+Flower&family=Kalam&family=Pacifico&family=Permanent+Marker&family=Sacramento&family=Shadows+Into+Light&family=VT323&display=swap');
+    
+    :root {
+      --primary-color: #4a6fa5;
+      --hover-color: #3a5a80;
+      --danger-color: #e74c3c;
+      --danger-hover: #c0392b;
+      --shadow-color: rgba(0, 0, 0, 0.2);
+      --transition-time: 0.4s;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow-x: hidden;
+    }
+    
+    .header {
+      margin-bottom: 2rem;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .header::before {
+      content: "";
+      position: absolute;
+      width: 120%;
+      height: 30px;
+      bottom: 5px;
+      left: -10%;
+      transform: rotate(-1deg);
+      z-index: -1;
+      border-radius: 50%;
+      filter: blur(5px);
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 0.5rem;
+      font-size: 3rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      letter-spacing: 1px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    h1::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 6px;
+      bottom: -10px;
+      left: 0;
+      border-radius: 3px;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      position: relative;
+    }
+    
+    /* Floaters animation */
+    .floaters {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    .floater {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background-color: rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      filter: blur(15px);
+      animation: float 15s infinite ease-in-out;
+      opacity: 0.3;
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+      }
+      25% {
+        transform: translate(100px, 100px) rotate(90deg) scale(1.2);
+      }
+      50% {
+        transform: translate(200px, 50px) rotate(180deg) scale(0.8);
+      }
+      75% {
+        transform: translate(100px, 200px) rotate(270deg) scale(1.3);
+      }
+      100% {
+        transform: translate(0, 0) rotate(360deg) scale(1);
+      }
+    }
+    
+    .controls {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+      transition: transform var(--transition-time), box-shadow var(--transition-time);
+    }
+    
+    .controls::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity var(--transition-time);
+      transform: rotate(30deg);
+      pointer-events: none;
+    }
+    
+    .controls:hover {
+      transform: translateY(-5px);
+      /* box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), 0 10px 20px rgba(0, 0, 0, 0.1); */
+    }
+    
+    .controls:hover::before {
+      opacity: 1;
+    }
+    
+    .input-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    
+    textarea {
+      flex-grow: 1;
+      padding: 1rem;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      resize: vertical;
+      min-height: 120px;
+      font-size: 1.1rem;
+      background-color: rgba(255, 255, 255, 0.9);
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    textarea:focus {
+      outline: none;
+      /* border-color: var(--primary-color); */
+      /* box-shadow: 0 0 0 4px rgba(74, 111, 165, 0.2); */
+      transform: scale(1.01);
+    }
+    
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.9rem 1.8rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    
+    button::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 0;
+      background: rgba(0, 0, 0, 0.1);
+      transition: height 0.3s;
+      z-index: -1;
+    }
+    
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 7px 14px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    button:hover::before {
+      height: 100%;
+    }
+    
+    button:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    #create-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    #create-btn i {
+      transition: transform 0.3s;
+    }
+    
+    #create-btn:hover i {
+      transform: rotate(90deg) scale(1.2);
+    }
+    
+    .clear-btn {
+      background-color: var(--danger-color);
+    }
+    
+    .clear-btn:active {
+      background-color: var(--danger-hover);
+    }
+    
+    .notes-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      justify-content: center;
+      perspective: 1000px;
+      padding: 1rem;
+    }
+    
+    .sticky-note {
+      width: 250px;
+      min-height: 250px;
+      padding: 1.8rem;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      word-wrap: break-word;
+      display: flex;
+      flex-direction: column;
+      transform-style: preserve-3d;
+      transform: rotateX(0deg) rotateY(0deg) rotateZ(var(--rotation)) translateZ(0);
+      border-radius: 2px;
+      animation: appear 0.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      opacity: 0;
+      cursor: grab;
+    }
+    
+    @keyframes appear {
+      from {
+        opacity: 0;
+        transform: translateY(30px) rotateX(20deg) rotateZ(var(--rotation)) scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0) rotateZ(var(--rotation)) scale(1);
+      }
+    }
+    
+    .sticky-note::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0) 50%
+      );
+      pointer-events: none;
+    }
+    
+    .sticky-note:hover {
+      transform: translateY(-10px) rotateX(5deg) rotateZ(var(--rotation)) scale(1.05);
+      box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
+      z-index: 2;
+    }
+    
+    .sticky-note:active {
+      cursor: grabbing;
+    }
+    
+    .sticky-note::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(
+        135deg,
+        transparent 50%,
+        rgba(0, 0, 0, 0.1) 50%
+      );
+      border-radius: 0 0 0 4px;
+    }
+    
+    .sticky-note .paper-clip {
+      position: absolute;
+      top: -5px;
+      right: 20px;
+      width: 30px;
+      height: 40px;
+      border-radius: 5px 5px 0 0;
+      border: 2px solid rgba(0, 0, 0, 0.3);
+      border-bottom: none;
+      transform: rotate(-10deg);
+      z-index: 1;
+    }
+    
+    .sticky-note .content {
+      flex-grow: 1;
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 1;
+      line-height: 1.5;
+    }
+    
+    .sticky-note .mood {
+      font-size: 0.8rem;
+      align-self: flex-end;
+      font-style: italic;
+      opacity: 0.7;
+      position: relative;
+      z-index: 1;
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .sticky-note .delete-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background-color: transparent;
+      color: rgba(0, 0, 0, 0.5);
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 2;
+      transform: rotate(0deg) scale(0.8);
+    }
+    
+    .sticky-note:hover .delete-btn {
+      opacity: 1;
+      transform: rotate(360deg) scale(1);
+    }
+    
+    .sticky-note .delete-btn:hover {
+      background-color: rgba(231, 76, 60, 0.2);
+      color: rgba(231, 76, 60, 1);
+      box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
+    }
+    
+    .sticky-note .date {
+      position: absolute;
+      bottom: 0.5rem;
+      left: 0.5rem;
+      font-size: 0.7rem;
+      opacity: 0.5;
+    }
+    
+    .pin {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #888;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      z-index: 2;
+    }
+    
+    .pin::after {
+      content: '';
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      top: 2px;
+      left: 2px;
+    }
+    
+    @media (max-width: 768px) {
+      .notes-container {
+        gap: 1rem;
+      }
+      
+      .sticky-note {
+        width: 100%;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+    }
+    
+    /* Cool loading animation */
+    .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #f5f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s, visibility 0.5s;
+    }
+    
+    .loading.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      position: relative;
+    }
+    
+    .loading-spinner div {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 6px solid transparent;
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    }
+    
+    .loading-spinner div:nth-child(1) {
+      animation-delay: -0.45s;
+    }
+    
+    .loading-spinner div:nth-child(2) {
+      animation-delay: -0.3s;
+    }
+    
+    .loading-spinner div:nth-child(3) {
+      animation-delay: -0.15s;
+    }
+    
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    /* Tooltip styles */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .tooltip .tooltip-text {
+      visibility: hidden;
+      width: 120px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -60px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .tooltip .tooltip-text::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #333 transparent transparent transparent;
+    }
+    
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+    
+     h1, p {
+    font-family: 'Hubot Sans', sans-serif;
+  }
+  
+  h1 {
+    letter-spacing: -0.05em;
+    font-weight: 700;
+  }
+  
+  .header p {
+    font-weight: 400;
+    letter-spacing: 0.03em;
+  }
+  
+  /* Style the textarea with Hubot Sans */
+  textarea {
+    font-family: 'Hubot Sans', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    border-radius: 15px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    padding: 1.2rem;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 2px solid #e0e0e0;
+  }
+  
+  textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(74, 111, 165, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Style the note creation card to match the notes theme */
+  .controls {
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    /* box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); */
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    position: relative;
+  }
+  
+  .controls::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); */
+    z-index: 0;
+  }
+  
+
+  /* Make buttons match the theme with Hubot Sans */
+  button {
+    font-family: 'Hubot Sans', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    border-radius: 15px;
+  }
+  </style>
+</head>
+<body>
+  <!-- Loading animation -->
+  <div class="loading">
+    <div class="loading-spinner">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+  
+  <!-- Background floaters -->
+  <div class="floaters">
+    <div class="floater" style="top: 10%; left: 10%; animation-delay: 0s;"></div>
+    <div class="floater" style="top: 70%; left: 20%; animation-delay: -3s;"></div>
+    <div class="floater" style="top: 40%; left: 80%; animation-delay: -6s;"></div>
+    <div class="floater" style="top: 60%; left: 50%; animation-delay: -9s;"></div>
+    <div class="floater" style="top: 20%; left: 60%; animation-delay: -12s;"></div>
+  </div>
+  
+  <div class="container">
+    <div class="header">
+      <h1>Sticky Notes</h1>
+      <p>Create personal, stylish notes with random fonts, themes, and moods</p>
+    </div>
+    
+    <div class="controls">
+      <div class="input-group">
+        <textarea id="note-input" placeholder="Type your note, affirmation, or brain dump here..."></textarea>
+      </div>
+      <div class="button-group">
+        <button id="create-btn"><i class="fas fa-plus-circle"></i> Create Sticky Note</button>
+        <button id="clear-all-btn" class="clear-btn"><i class="fas fa-trash-alt"></i> Clear All</button>
+      </div>
+    </div>
+    
+    <div class="notes-container" id="notes-container"></div>
+  </div>
+  
+<script>
+  // Wait for page load
+  window.addEventListener('load', function() {
+    setTimeout(() => {
+      document.querySelector('.loading').classList.add('hidden');
+    }, 1000);
+  });
+  
+  // Array to store notes (in-memory storage instead of localStorage)
+  let notes = [];
+  
+  // Font families from Google Fonts
+  const fonts = [
+    'Architects Daughter, cursive',
+    'Caveat, cursive',
+    'Dancing Script, cursive',
+    'Indie Flower, cursive',
+    'Kalam, cursive',
+    'Pacifico, cursive',
+    'Permanent Marker, cursive',
+    'Sacramento, cursive',
+    'Shadows Into Light, cursive',
+    'VT323, monospace'
+  ];
+  
+  // Colors for different moods/themes
+  const backgroundColors = [
+    '#FFD700', // gold
+    '#FFAFCC', // pink
+    '#A2D2FF', // light blue
+    '#CDB4DB', // lavender
+    '#CAFFBF', // light green
+    '#FF9F1C', // orange
+    '#FDFFB6', // light yellow
+    '#9BF6FF', // cyan
+    '#FFC6FF', // light purple
+    '#D8E2DC', // light gray
+  ];
+  
+  const textColors = [
+    '#1A1A1D', // almost black
+    '#370617', // dark red
+    '#03045E', // dark blue
+    '#3A015C', // purple
+    '#004B23', // forest green
+    '#641220', // burgundy
+    '#5C4D7D', // twilight purple
+    '#3D348B', // indigo
+    '#540B0E', // dark red
+    '#293241', // navy blue
+  ];
+  
+  // Mood/theme labels with emojis
+  const moods = [
+    '✨ Energetic',
+    '😌 Calm',
+    '🎨 Creative',
+    '🧠 Focused',
+    '💭 Dreamy',
+    '💪 Motivated',
+    '🌪️ Chaotic',
+    '🎮 Playful',
+    '🧐 Serious',
+    '🦄 Whimsical'
+  ];
+  
+  // Get random item from array
+  function getRandomItem(array) {
+    return array[Math.floor(Math.random() * array.length)];
+  }
+  
+  // Generate random rotation between -6 and 6 degrees
+  function getRandomRotation() {
+    return Math.floor(Math.random() * 12) - 6;
+  }
+  
+  // Generate a unique ID
+  function generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+  
+  // Format date for display
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+  
+  // Create a new note
+  function createNote(text) {
+    if (!text.trim()) return;
+    
+    const font = getRandomItem(fonts);
+    const bgColor = getRandomItem(backgroundColors);
+    const textColor = getRandomItem(textColors);
+    const mood = getRandomItem(moods);
+    const rotation = getRandomRotation();
+    const pinColor = getRandomItem(['#D32F2F', '#303F9F', '#388E3C', '#FFA000', '#616161']);
+    
+    const note = {
+      id: generateId(),
+      text,
+      font,
+      bgColor,
+      textColor,
+      mood,
+      rotation,
+      pinColor,
+      date: new Date().toISOString()
+    };
+    
+    notes.unshift(note);
+    renderNotes();
+    
+    document.getElementById('note-input').value = '';
+    
+    // Add some visual feedback
+    const button = document.getElementById('create-btn');
+    button.innerHTML = '<i class="fas fa-check"></i> Created!';
+    button.style.backgroundColor = '#2ecc71';
+    
+    setTimeout(() => {
+      button.innerHTML = '<i class="fas fa-plus-circle"></i> Create Sticky Note';
+      button.style.backgroundColor = '';
+    }, 1500);
+  }
+  
+  // Delete a note with animation
+  function deleteNote(id) {
+    // Find the note element
+    const noteElement = document.querySelector(`[data-id="${id}"]`);
+    
+    // Add deletion animation
+    noteElement.style.transform = 'translateY(100px) rotateZ(20deg)';
+    noteElement.style.opacity = '0';
+    
+    // Remove from DOM after animation
+    setTimeout(() => {
+      notes = notes.filter(note => note.id !== id);
+      renderNotes();
+    }, 300);
+  }
+  
+  // Clear all notes
+  function clearAllNotes() {
+    if (notes.length === 0) return;
+    
+    if (confirm('Are you sure you want to delete all notes?')) {
+      // Animate all notes
+      const noteElements = document.querySelectorAll('.sticky-note');
+      noteElements.forEach((el, i) => {
+        setTimeout(() => {
+          el.style.transform = 'translateY(100px) rotateZ(20deg)';
+          el.style.opacity = '0';
+        }, i * 100);
+      });
+      
+      // Clear after all animations
+      setTimeout(() => {
+        notes = [];
+        renderNotes();
+      }, noteElements.length * 100 + 300);
+    }
+  }
+  
+  // Render notes to the DOM
+  function renderNotes() {
+    const container = document.getElementById('notes-container');
+    container.innerHTML = '';
+    
+    if (notes.length === 0) {
+      const emptyMessage = document.createElement('div');
+      emptyMessage.style.textAlign = 'center';
+      emptyMessage.style.opacity = '0.5';
+      emptyMessage.style.margin = '3rem 0';
+      emptyMessage.innerHTML = '<i class="fas fa-sticky-note" style="font-size: 3rem; margin-bottom: 1rem;"></i><p>No notes yet. Create one!</p>';
+      container.appendChild(emptyMessage);
+      return;
+    }
+    
+    notes.forEach((note, index) => {
+      const noteElement = document.createElement('div');
+      noteElement.className = 'sticky-note';
+      noteElement.setAttribute('data-id', note.id);
+      noteElement.style.backgroundColor = note.bgColor;
+      noteElement.style.color = note.textColor;
+      noteElement.style.fontFamily = note.font;
+      noteElement.style.setProperty('--rotation', `${note.rotation}deg`);
+      noteElement.style.animationDelay = `${index * 0.1}s`;
+      
+      // Allow dragging the note
+      noteElement.setAttribute('draggable', 'true');
+      
+      noteElement.innerHTML = `
+        <div class="pin" style="background-color: ${note.pinColor};"></div>
+        <div class="content">${note.text}</div>
+        <div class="mood">${note.mood}</div>
+        <div class="date">${formatDate(note.date)}</div>
+        <button class="delete-btn tooltip" data-id="${note.id}">
+          <i class="fas fa-times"></i>
+          <span class="tooltip-text">Delete Note</span>
+        </button>
+      `;
+      
+      container.appendChild(noteElement);
+      
+      // Add 3D tilt effect on mouse movement
+      noteElement.addEventListener('mousemove', (e) => {
+        const rect = noteElement.getBoundingClientRect();
+        const x = e.clientX - rect.left; // x position within the element
+        const y = e.clientY - rect.top; // y position within the element
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const tiltX = (y - centerY) / 10;
+        const tiltY = (centerX - x) / 10;
+        
+        noteElement.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) rotateZ(${note.rotation}deg)`;
+      });
+      
+      // Reset tilt on mouse leave
+      noteElement.addEventListener('mouseleave', () => {
+        noteElement.style.transform = `rotateZ(${note.rotation}deg)`;
+      });
+    });
+    
+    // Add event listeners to delete buttons
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        deleteNote(id);
+        e.stopPropagation(); // Prevent event bubbling
+      });
+    });
+    
+    // Add drag functionality
+    document.querySelectorAll('.sticky-note').forEach(note => {
+      note.addEventListener('dragstart', handleDragStart);
+      note.addEventListener('dragover', handleDragOver);
+      note.addEventListener('dragenter', handleDragEnter);
+      note.addEventListener('dragleave', handleDragLeave);
+      note.addEventListener('drop', handleDrop);
+      note.addEventListener('dragend', handleDragEnd);
+    });
+  }
+  
+  // Drag and drop functionality
+  let draggedNote = null;
+  
+  function handleDragStart(e) {
+    draggedNote = this;
+    this.style.opacity = '0.4';
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+  }
+  
+  function handleDragOver(e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+  }
+  
+  function handleDragEnter(e) {
+    this.classList.add('over');
+  }
+  
+  function handleDragLeave(e) {
+    this.classList.remove('over');
+  }
+  
+  function handleDrop(e) {
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    }
+    
+    if (draggedNote !== this) {
+      // Get the IDs of the dragged note and drop target
+      const draggedId = draggedNote.getAttribute('data-id');
+      const targetId = this.getAttribute('data-id');
+      
+      // Find their positions in the notes array
+      const draggedIndex = notes.findIndex(note => note.id === draggedId);
+      const targetIndex = notes.findIndex(note => note.id === targetId);
+      
+      // Reorder the array
+      const [movedNote] = notes.splice(draggedIndex, 1);
+      notes.splice(targetIndex, 0, movedNote);
+      
+      // Re-render notes
+      renderNotes();
+    }
+    
+    return false;
+  }
+  
+  function handleDragEnd(e) {
+    document.querySelectorAll('.sticky-note').forEach(note => {
+      note.classList.remove('over');
+    });
+    draggedNote.style.opacity = '1';
+  }
+  
+  // Event Listeners
+  document.getElementById('create-btn').addEventListener('click', () => {
+    const text = document.getElementById('note-input').value;
+    createNote(text);
+  });
+  
+  document.getElementById('clear-all-btn').addEventListener('click', clearAllNotes);
+  
+  // Allow creating note with Enter key
+  document.getElementById('note-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      const text = document.getElementById('note-input').value;
+      createNote(text);
+    }
+  });
+  
+  // Initialize the notes display
+  renderNotes();
+  
+  // Save notes to localStorage before page unload
+  window.addEventListener('beforeunload', () => {
+    localStorage.setItem('sticky-notes', JSON.stringify(notes));
+  });
+  
+  // Load notes from localStorage on page load
+  const savedNotes = localStorage.getItem('sticky-notes');
+  if (savedNotes) {
+    try {
+      notes = JSON.parse(savedNotes);
+      renderNotes();
+    } catch (e) {
+      console.error('Error loading saved notes:', e);
+    }
+  }
+</script>
